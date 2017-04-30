@@ -19,6 +19,7 @@ const _ = {
   create (store) {
     return (req, res) => {
       const id = shortid.generate()
+      store.create({id, url: req.body.url})
       return res.status(201).location(`/songs/${id}`).send()
     }
   },

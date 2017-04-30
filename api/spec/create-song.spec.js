@@ -1,4 +1,5 @@
 const test = require('ava')
+const sinon = require('sinon')
 const api = require('./helpers').api
 
 test('returns 400 when url is missing', async t => {
@@ -19,4 +20,11 @@ test('returns 201 when url is provided', async t => {
 test('returns the resource location', async t => {
   const response = await api().post('/songs').send({url: 'http://google.com'})
   t.regex(response.headers.location, /\/songs\/.+/)
+})
+
+test('calls store.create', async t => {
+  const store = { create: sinon.spy() }
+  await api(store).post('/songs').send({url: 'http://google.com'})
+  const expectedData = { id: sinon.match.string, url: 'http://google.com' }
+  t.is(store.create.calledWith(expectedData), true)
 })

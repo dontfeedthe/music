@@ -11,4 +11,4 @@ const fakeStore = {
   }
 }
 
-exports.api = () => supertest(server(fakeStore))
+exports.api = (store = fakeStore) => supertest(server(store))
