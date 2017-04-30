@@ -11,7 +11,12 @@ test('returns 400 when url is invalid', async t => {
   t.is(response.status, 400)
 })
 
-test('return 201 when url is provided', async t => {
+test('returns 201 when url is provided', async t => {
   const response = await api().post('/songs').send({url: 'http://google.com'})
   t.is(response.status, 201)
+})
+
+test('returns the resource location', async t => {
+  const response = await api().post('/songs').send({url: 'http://google.com'})
+  t.regex(response.headers.location, /\/songs\/.+/)
 })

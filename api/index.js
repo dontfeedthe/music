@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const joi = require('joi')
+const shortid = require('shortid')
 
 const schemas = {
   song: joi.object().keys({
@@ -19,7 +20,8 @@ const _ = {
 
   create (store) {
     return (req, res) => {
-      return res.status(201).send()
+      const id = shortid.generate()
+      return res.status(201).location(`/songs/${id}`).send()
     }
   },
 
