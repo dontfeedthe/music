@@ -2,6 +2,12 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const joi = require('joi')
 
+const schemas = {
+  song: joi.object().keys({
+    url: joi.string().uri().required()
+  })
+}
+
 const _ = {
   findAll (store) {
     return (req, res) => {
@@ -13,13 +19,15 @@ const _ = {
 
   create (store) {
     return (req, res) => {
-      const schema = joi.object().keys({
-        url: joi.string().uri().required()
-      })
+      return res.status(201).send()
+    }
+  },
+
+  validate (schema) {
+    return (req, res, next) => {
       const result = joi.validate(req.body, schema)
       if (result.error) return res.status(400).send()
-
-      return res.status(201).send()
+      return next()
     }
   }
 }
@@ -29,7 +37,7 @@ module.exports = (store) => {
   app.use(bodyParser.json())
 
   app.get('/songs', _.findAll(store))
-  app.post('/songs', _.create(store))
+  app.post('/songs', _.validate(schemas.song), _.create(store))
 
   return app
 }
