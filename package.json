@@ -1,0 +1,8 @@
+{
+  "name": "octo-music",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@github.com:dontfeedthe/music.git",
+  "author": "Simon Renoult <simon.renoult@gmail.com>",
+  "license": "MIT"
+}
