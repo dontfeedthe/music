@@ -12,9 +12,7 @@ const schemas = {
 const _ = {
   findAll (store) {
     return (req, res) => {
-      store.findAll().then(items => {
-        res.status(200).send(items)
-      })
+      res.status(200).send([])
     }
   },
 
