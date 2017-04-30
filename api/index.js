@@ -38,6 +38,10 @@ const _ = {
     res.header('Access-Control-Allow-Origin', '*')
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     return next()
+  },
+
+  failIfRouteDoesNotExist (req, res) {
+    return res.status(501).send('Oops, this does not exist (yet!)')
   }
 }
 
@@ -46,8 +50,11 @@ module.exports = (store) => {
   app.use(bodyParser.json())
 
   app.all('*', _.allowCors)
+
   app.get('/songs', _.findAll(store))
   app.post('/songs', _.validate(schemas.song), _.create(store))
+
+  app.all('*', _.failIfRouteDoesNotExist)
 
   return app
 }
