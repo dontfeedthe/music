@@ -79,6 +79,7 @@ const _ = {
         case 200: return res.status(code).send(data)
         case 201: return res.status(code).location(res.locals.location).send(data)
         case 204: return res.status(code).send(data)
+        default: return res.status(500).send('Oops...')
       }
     }
   }
@@ -86,6 +87,7 @@ const _ = {
 
 module.exports = (store) => {
   const app = express()
+
   app.use(helmet())
   app.use(bodyParser.json())
   app.use(_.allowCors)
