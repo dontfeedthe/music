@@ -62,7 +62,7 @@ const _ = {
   validate (schema) {
     return (req, res, next) => {
       const result = joi.validate(req.body, schema)
-      if (result.error) return res.status(400).send()
+      if (result.error) return res.status(400).send(result.error.details)
       res.locals.data = result.value
       return next()
     }
