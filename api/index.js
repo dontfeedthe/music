@@ -57,12 +57,10 @@ const _ = {
     return res.status(501).send('Oops, this does not exist (yet!)')
   },
 
-  failIfMissing (store) {
-    return (req, res, next) => {
-      const item = res.locals.data
-      if (!item) return res.status(404).send()
-      next()
-    }
+  failIfMissing (req, res, next) {
+    const item = res.locals.data
+    if (!item) return res.status(404).send()
+    next()
   },
 
   delete (store) {
@@ -94,7 +92,8 @@ module.exports = (store) => {
 
   app.get('/songs', _.findAll(store), _.send(200, true))
   app.post('/songs', _.validate(schemas.song), _.create(store), _.send(201))
-  app.delete('/songs/:id', _.findById(store), _.failIfMissing(store), _.delete(store), _.send(204))
+  app.delete('/songs/:id', _.findById(store), _.failIfMissing, _.delete(store), _.send(204))
+  app.get('/songs/:id', _.findById(store), _.failIfMissing, _.send(200, true))
 
   app.all('*', _.failIfRouteDoesNotExist)
 
