@@ -4,10 +4,11 @@ const joi = require('joi')
 const shortid = require('shortid')
 const helmet = require('helmet')
 const moment = require('moment')
+const url = require('url')
 
 const schemas = {
   song: joi.object().keys({
-    url: joi.string().uri().required().regex(/^https:\/\/youtube.com/),
+    url: joi.string().uri().required().regex(/^https:\/\/(www\.)?youtube\.com\/watch\?v=.+$/),
     created_at: joi.default(moment().toISOString())
   })
 }
@@ -34,8 +35,16 @@ const _ = {
 
   create (store) {
     return (req, res, next) => {
-      const item = Object.assign({id: shortid.generate()}, res.locals.data)
-      store.create(item)
+      const item = {}
+
+      const itemId = shortid.generate()
+      item.id = itemId
+
+      const query = url.parse(res.locals.data.url).query
+      item.url_id = query.split('=')[1]
+
+      store.create(Object.assign(item, res.locals.data))
+
       res.locals.location = `/songs/${item.id}`
       next()
     }
