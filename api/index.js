@@ -39,6 +39,13 @@ const _ = {
     }
   },
 
+  delete (store) {
+    return (req, res, next) => {
+      store.deleteById(req.params.id)
+      next()
+    }
+  },
+
   validate (schema) {
     return (req, res, next) => {
       const result = joi.validate(req.body, schema)
@@ -61,13 +68,6 @@ const _ = {
     const item = res.locals.data
     if (!item) return res.status(404).send()
     next()
-  },
-
-  delete (store) {
-    return (req, res, next) => {
-      store.deleteById(req.params.id)
-      next()
-    }
   },
 
   send (code, sendData = false) {
