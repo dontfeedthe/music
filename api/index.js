@@ -12,9 +12,10 @@ const schemas = {
 
 const _ = {
   findAll (store) {
-    return (req, res) => {
+    return (req, res, next) => {
       store.findAll().then(items => {
-        res.status(200).send(items)
+        res.locals.data = items
+        next()
       })
     }
   },
@@ -23,17 +24,18 @@ const _ = {
     return (req, res, next) => {
       const id = req.params.id
       store.findById(id).then(item => {
-        res.locals.item = item
+        res.locals.data = item
         next()
       })
     }
   },
 
   create (store) {
-    return (req, res) => {
+    return (req, res, next) => {
       const id = shortid.generate()
       store.create({id, url: req.body.url})
-      return res.status(201).location(`/songs/${id}`).send()
+      res.locals.location = `/songs/${id}`
+      next()
     }
   },
 
@@ -57,7 +59,7 @@ const _ = {
 
   failIfMissing (store) {
     return (req, res, next) => {
-      const item = res.locals.item
+      const item = res.locals.data
       if (!item) return res.status(404).send()
       next()
     }
@@ -66,7 +68,18 @@ const _ = {
   delete (store) {
     return (req, res, next) => {
       store.deleteById(req.params.id)
-      return res.status(204).send()
+      next()
+    }
+  },
+
+  send (code, sendData = false) {
+    return (req, res, next) => {
+      const data = sendData ? res.locals.data : undefined
+      switch (code) {
+        case 200: return res.status(code).send(data)
+        case 201: return res.status(code).location(res.locals.location).send(data)
+        case 204: return res.status(code).send(data)
+      }
     }
   }
 }
@@ -77,9 +90,9 @@ module.exports = (store) => {
   app.use(bodyParser.json())
   app.use(_.allowCors)
 
-  app.get('/songs', _.findAll(store))
-  app.post('/songs', _.validate(schemas.song), _.create(store))
-  app.delete('/songs/:id', _.findById(store), _.failIfMissing(store), _.delete(store))
+  app.get('/songs', _.findAll(store), _.send(200, true))
+  app.post('/songs', _.validate(schemas.song), _.create(store), _.send(201))
+  app.delete('/songs/:id', _.findById(store), _.failIfMissing(store), _.delete(store), _.send(204))
 
   app.all('*', _.failIfRouteDoesNotExist)
 
