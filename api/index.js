@@ -8,8 +8,7 @@ const url = require('url')
 
 const schemas = {
   song: joi.object().keys({
-    url: joi.string().uri().required().regex(/^https:\/\/(www\.)?youtube\.com\/watch\?v=.+$/),
-    created_at: joi.default(moment().toISOString())
+    url: joi.string().uri().required().regex(/^https:\/\/(www\.)?youtube\.com\/watch\?v=.+$/)
   })
 }
 
@@ -39,6 +38,9 @@ const _ = {
 
       const itemId = shortid.generate()
       item.id = itemId
+
+      const createdAt = moment().toISOString()
+      item.created_at = createdAt
 
       const query = url.parse(res.locals.data.url).query
       item.url_id = query.split('=')[1]
