@@ -3,10 +3,12 @@ const bodyParser = require('body-parser')
 const joi = require('joi')
 const shortid = require('shortid')
 const helmet = require('helmet')
+const moment = require('moment')
 
 const schemas = {
   song: joi.object().keys({
-    url: joi.string().uri().required()
+    url: joi.string().uri().required().regex(/^https:\/\/youtube.com/),
+    created_at: joi.default(moment().toISOString())
   })
 }
 
@@ -32,9 +34,9 @@ const _ = {
 
   create (store) {
     return (req, res, next) => {
-      const id = shortid.generate()
-      store.create({id, url: req.body.url})
-      res.locals.location = `/songs/${id}`
+      const item = Object.assign({id: shortid.generate()}, res.locals.data)
+      store.create(item)
+      res.locals.location = `/songs/${item.id}`
       next()
     }
   },
@@ -50,6 +52,7 @@ const _ = {
     return (req, res, next) => {
       const result = joi.validate(req.body, schema)
       if (result.error) return res.status(400).send()
+      res.locals.data = result.value
       return next()
     }
   },
