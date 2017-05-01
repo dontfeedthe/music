@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const joi = require('joi')
 const shortid = require('shortid')
+const helmet = require('helmet')
 
 const schemas = {
   song: joi.object().keys({
@@ -64,6 +65,7 @@ const _ = {
 
 module.exports = (store) => {
   const app = express()
+  app.use(helmet())
   app.use(bodyParser.json())
   app.use(_.allowCors)
 
