@@ -5,6 +5,7 @@ const shortid = require('shortid')
 const helmet = require('helmet')
 const moment = require('moment')
 const url = require('url')
+const got = require('got')
 
 const schemas = {
   song: joi.object().keys({
@@ -13,6 +14,28 @@ const schemas = {
 }
 
 const _ = {
+  isAuthenticated (req, res, next) {
+    const auth = req.headers.authorization
+    if (!auth) return res.send(401).send('Missing "Authorization" header')
+
+    const authChunks = auth.split(' ')
+    const authType = authChunks[0]
+    if (authType.toLowerCase() !== 'bearer') return res.status(401).send('Authentication must be "bearer"')
+
+    const authToken = authChunks[1]
+    if (!authToken) return res.status(401).send('Access token is missing')
+
+    const url = `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${authToken}`
+    got(url)
+      .then(googleResponse => {
+        res.locals.auth = googleResponse.body
+        next()
+      })
+      .catch(error => {
+        return res.status(400).send(error)
+      })
+  },
+
   findAll (store) {
     return (req, res, next) => {
       store.findAll().then(items => {
@@ -104,7 +127,7 @@ module.exports = (store) => {
   app.use(bodyParser.json())
   app.use(_.allowCors)
 
-  app.get('/songs', _.findAll(store), _.send(200, true))
+  app.get('/songs', _.isAuthenticated, _.findAll(store), _.send(200, true))
   app.post('/songs', _.validate(schemas.song), _.create(store), _.send(201))
   app.delete('/songs/:id', _.findById(store), _.failIfMissing, _.delete(store), _.send(204))
   app.get('/songs/:id', _.findById(store), _.failIfMissing, _.send(200, true))
