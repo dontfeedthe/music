@@ -65,8 +65,7 @@ const _ = {
 module.exports = (store) => {
   const app = express()
   app.use(bodyParser.json())
-
-  app.all('*', _.allowCors)
+  app.use(_.allowCors)
 
   app.get('/songs', _.findAll(store))
   app.post('/songs', _.validate(schemas.song), _.create(store))
