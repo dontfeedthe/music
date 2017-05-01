@@ -19,6 +19,16 @@ const _ = {
     }
   },
 
+  findById (store) {
+    return (req, res, next) => {
+      const id = req.params.id
+      store.findById(id).then(item => {
+        res.locals.item = item
+        next()
+      })
+    }
+  },
+
   create (store) {
     return (req, res) => {
       const id = shortid.generate()
@@ -47,11 +57,9 @@ const _ = {
 
   failIfMissing (store) {
     return (req, res, next) => {
-      store.findById().then(item => {
-        if (!item) return res.status(404).send()
-        req.data = item
-        next()
-      })
+      const item = res.locals.item
+      if (!item) return res.status(404).send()
+      next()
     }
   },
 
@@ -71,7 +79,7 @@ module.exports = (store) => {
 
   app.get('/songs', _.findAll(store))
   app.post('/songs', _.validate(schemas.song), _.create(store))
-  app.delete('/songs/:id', _.failIfMissing(store), _.delete(store))
+  app.delete('/songs/:id', _.findById(store), _.failIfMissing(store), _.delete(store))
 
   app.all('*', _.failIfRouteDoesNotExist)
 

@@ -13,6 +13,7 @@ test('calls store.findById', async t => {
   const findByIdSpy = sinon.spy(store, 'findById')
   await api(store).delete('/songs/fake-song-id')
   t.is(findByIdSpy.calledOnce, true)
+  t.is(findByIdSpy.calledWith('fake-song-id'), true)
 })
 
 test('calls store.deleteById', async t => {
